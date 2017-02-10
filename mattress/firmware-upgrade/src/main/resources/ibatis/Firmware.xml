@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="co.darma.smartmattress.upgrade">
+
+	<resultMap type="co.darma.smartmattress.upgrade.entity.Firmware" id="Firmware">
+		<id property="firmwareId" column="FIRMWARE_ID" javaType="Long" jdbcType="INTEGER"/>
+		<result property="firmwareName" column="FIRMWARE_NAME" javaType="string" jdbcType="VARCHAR"/>
+		<result property="versionNo" column="VERSION" javaType="Double" jdbcType="FLOAT"/>
+		<result property="firmwarePath" column="PATH" javaType="string" jdbcType="VARCHAR"/>
+		<result property="uploadTime" column="UPLOAD_TIME" javaType="Long" jdbcType="INTEGER"/>
+		<result property="md5Code" column="MD5" javaType="string" jdbcType="VARCHAR"/>
+		<result property="checkSum" column="CHECK_SUM" javaType="string" jdbcType="VARCHAR"/>
+	</resultMap>
+
+
+	<select id="queryLastestFirmwareByProjectId" parameterType="Integer" resultMap="Firmware">
+		SELECT T.FIRMWARE_ID,T.FIRMWARE_NAME,T.VERSION,T.PATH,T.UPLOAD_TIME,T.MD5,T.CHECK_SUM
+		from T_FIRMWARE T, T_R_PROJECT_FIRMWARE R
+		where
+		T.FIRMWARE_ID = R.FIRMWARE_ID AND
+		 R.PROJECT_ID = #{projectId} ORDER BY T.VERSION DESC limit 0, 1
+	</select>
+
+	<select id="queryFirmwareById" parameterType="int" resultMap="Firmware">
+		SELECT
+		F.FIRMWARE_ID,
+		F.FIRMWARE_NAME,
+		F.VERSION,
+		F.PATH,
+		F.UPLOAD_TIME,
+		F.MD5,
+		F.CHECK_SUM from T_FIRMWARE F where F.FIRMWARE_ID = #{FIRMWARE_ID}
+	</select>
+
+
+	<select id="queryFirmwareByProAndVer" resultMap="Firmware">
+		SELECT
+		F.FIRMWARE_ID,
+		F.FIRMWARE_NAME,
+		F.VERSION,
+		F.PATH,
+		F.UPLOAD_TIME,
+		F.MD5,
+		F.CHECK_SUM
+		from T_FIRMWARE F, T_R_PROJECT_FIRMWARE R where
+		F.FIRMWARE_ID = R.FIRMWARE_ID AND
+		R.PROJECT_ID = #{projectId} AND
+		<![CDATA[ ABS(F.VERSION - #{version}) < 0.01
+		]]>
+	</select>
+</mapper>

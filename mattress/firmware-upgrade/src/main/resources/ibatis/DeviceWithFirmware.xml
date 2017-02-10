@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="co.darma.smartmattress.upgrade">
+
+	<resultMap type="co.darma.smartmattress.upgrade.entity.DeviceWithFirmware" id="DeviceWithFirmware">
+		<id property="id" column="ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="deviceNo" column="DEVICE_SERIAL_NO" javaType="string" jdbcType="VARCHAR"/>
+		<result property="deviceName" column="DEVICE_NAME" javaType="string" jdbcType="VARCHAR"/>
+		<result property="deviceMacAddress" column="DEVICE_MAC_ADDRESS" javaType="string" jdbcType="VARCHAR"/>
+		<association property="project" column="PROJECT_ID" select="co.darma.smartmattress.queryProjectById"/>
+		<association property="firmware" column="FIRMWARE_ID"
+					 select="co.darma.smartmattress.upgrade.queryFirmwareById"/>
+	</resultMap>
+
+	<select id="queryDeviceWithFirmware" resultMap="DeviceWithFirmware">
+		  SELECT T.ID,
+		  T.DEVICE_SERIAL_NO,
+		  T.DEVICE_NAME,
+		  T.DEVICE_MAC_ADDRESS,
+		  T.PROJECT_ID,
+		  T.FIRMWARE_ID
+		  FROM	T_DEVICE T WHERE T.DEVICE_SERIAL_NO = #{deviceNo}
+	</select>
+
+	<update id="updateDeviceFirmware" parameterType="co.darma.smartmattress.upgrade.entity.DeviceWithFirmware">
+		UPDATE T_DEVICE SET FIRMWARE_ID = #{firmware.firmwareId} WHERE ID = #{id}
+	</update>
+</mapper>

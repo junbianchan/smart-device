@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="co.darma.smartmattress">
+
+	<resultMap type="co.darma.smartmattress.analysis.entity.OpticalData" id="OpticalData">
+		<result property="startTime" column="START_TIME" javaType="java.lang.Long" jdbcType="INTEGER"/>
+		<result property="endTime" column="END_TIME" javaType="java.lang.Long" jdbcType="INTEGER"/>
+		<result property="opticalData" column="OPTICAL_DATA" javaType="java.lang.String" jdbcType="VARCHAR"/>
+		<result property="updateTime" column="UPDATE_TIME" javaType="java.lang.Long" jdbcType="INTEGER"/>
+		<association property="device" column="DEVICE_ID" select="co.darma.smartmattress.queryDeviceIdById"/>
+	</resultMap>
+
+	<insert id="saveOrUpdateOpticalData" parameterType="co.darma.smartmattress.analysis.entity.OpticalData">
+		insert into T_OPTICAL_DATA(DEVICE_ID,START_TIME,END_TIME,OPTICAL_DATA,UPDATE_TIME)
+		values
+		 (#{device.id},#{startTime},#{endTime},#{opticalData},#{updateTime})
+		on DUPLICATE KEY UPDATE
+		`OPTICAL_DATA` =  VALUES(OPTICAL_DATA),
+		`END_TIME` =  VALUES(END_TIME),
+		`UPDATE_TIME` = VALUES (UPDATE_TIME)
+	</insert>
+
+</mapper>

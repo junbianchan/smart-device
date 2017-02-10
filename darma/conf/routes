@@ -1,0 +1,62 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET         /index                                    @co.darma.controllers.Application.index()
+
+POST        /auth/signup                              @co.darma.controllers.Authentication.signUp()
+
+POST        /auth/signin                              @co.darma.controllers.Authentication.signIn()
+
+POST        /auth/updatepassword/:accessToken         @co.darma.controllers.Authentication.updatePassword(accessToken)
+
+GET         /auth/signout/:accessToken                @co.darma.controllers.Authentication.signOut(accessToken)
+
+POST        /auth/thirdpartysignin                    @co.darma.controllers.Authentication.thirdPartySignIn()
+
+POST        /profile/create/:accessToken              @co.darma.controllers.Profile.createProfile(accessToken)
+
+POST        /profile/update/:accessToken              @co.darma.controllers.Profile.updateProfile(accessToken)
+
+GET         /profile/get/:accessToken                 @co.darma.controllers.Profile.getProfile(accessToken)
+
+GET         /password/forget/:email                   @co.darma.controllers.Authentication.forgetPassword(email)
+
+GET         /password/displayreset/:resetToken        @co.darma.controllers.Authentication.displayResetPasswordPage(resetToken)
+
+POST        /password/reset/:updateToken              @co.darma.controllers.Authentication.resetPassword(updateToken)
+
+
+PUT         /physical_records                         @co.darma.controllers.PhysicalRecordController.updateRecords()
+
+GET         /physical_records                         @co.darma.controllers.PhysicalRecordController.queryRecords()
+
+
+PUT         /sedentary_records                        @co.darma.controllers.SedentaryController.updateRecord()
+
+GET         /sedentary_records                        @co.darma.controllers.SedentaryController.queryRecords()
+
+
+PUT         /behaviors                                @co.darma.controllers.BehaviorController.updateBehavior()
+
+GET         /behaviors                                @co.darma.controllers.BehaviorController.queryBehaviors()
+
+
+PUT         /sitting                                  @co.darma.controllers.SittingController.updateSitting()
+
+GET         /sitting                                  @co.darma.controllers.SittingController.querySitting()
+
+
+## query any updates;
+GET         /updates/:lastUpdateTime                  @co.darma.controllers.DataUpdatesController.queryUpdates(lastUpdateTime)
+
+GET         /appversion                               @co.darma.controllers.Upgrade.getLatestVersion()
+
+PUT         /pic/:picName                             @co.darma.controllers.PictureController.uploadPic(picName)
+
+GET         /pic/:picUUID                             @co.darma.controllers.PictureController.downloadPic(picUUID)
+
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file                             controllers.Assets.at(path="/public", file)

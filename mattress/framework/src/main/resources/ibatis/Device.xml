@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="co.darma.smartmattress">
+
+
+	<resultMap type="co.darma.smartmattress.entity.DeviceManRelation" id="DeviceManRelation">
+		<id property="id" column="ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="userId" column="USER_ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="deviceId" column="DEVICE_ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="boundTime" column="BOUND_TIME" javaType="java.lang.Long" jdbcType="INTEGER"/>
+		<result property="unboudTime" column="UNBOUND_TIME" javaType="java.lang.Long" jdbcType="INTEGER"/>
+		<result property="isActive" column="ACTIVE" javaType="boolean" jdbcType="INTEGER"/>
+	</resultMap>
+
+	<resultMap type="co.darma.smartmattress.entity.Device" id="Device">
+		<id property="id" column="ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="deviceNo" column="DEVICE_SERIAL_NO" javaType="java.lang.String" jdbcType="VARCHAR"/>
+		<result property="deviceName" column="DEVICE_NAME" javaType="java.lang.String" jdbcType="VARCHAR"/>
+		<result property="deviceMacAddress" column="DEVICE_MAC_ADDRESS" javaType="java.lang.String" jdbcType="VARCHAR"/>
+
+		<association property="project" column="PROJECT_ID" select="co.darma.smartmattress.queryProjectById"/>
+	</resultMap>
+
+	<select id="queryDeviceIdById" parameterType="int" resultMap="Device">
+		SELECT ID,DEVICE_SERIAL_NO,PROJECT_ID from T_DEVICE where ID = #{DEVICE_ID}
+	</select>
+
+	<insert id="insertNewDevice" parameterType="co.darma.smartmattress.entity.Device" useGeneratedKeys="true"
+			keyProperty="id">
+		INSERT INTO T_DEVICE (DEVICE_SERIAL_NO,DEVICE_NAME,DEVICE_MAC_ADDRESS) VALUES (#{deviceNo},#{deviceName},#{deviceMacAddress})
+	</insert>
+
+	<insert id="insertDeviceManRelation" parameterType="co.darma.smartmattress.entity.DeviceManRelation">
+		 INSERT INTO T_DEVICE_MAN_RELATION (USER_ID,DEVICE_ID,BOUND_TIME,UNBOUND_TIME,ACTIVE)
+		  VALUES (#{userId},#{deviceNo},#{boundTime},#{unboudTime},#{isActive})
+	</insert>
+
+	<select id="queryDeviceByNo"  resultMap="Device">
+		  select ID,
+		  DEVICE_SERIAL_NO,
+		  DEVICE_NAME,
+		  DEVICE_MAC_ADDRESS,
+		  PROJECT_ID
+		  from T_DEVICE T WHERE
+		  T.DEVICE_SERIAL_NO = #{deviceNo}
+	</select>
+
+
+	<select id="queryDeviceRelationList" parameterType="java.lang.Integer" resultMap="DeviceManRelation">
+		SELECT ID,DEVICE_ID,USER_ID,BOUND_TIME,UNBOUND_TIME,ACTIVE FROM T_DEVICE_MAN_RELATION WHERE
+		DEVICE_ID = #{deviceNo} and ACTIVE = 1
+	</select>
+
+
+	<update id="updateDeviceRelationBatch" parameterType="java.util.List">
+
+		UPDATE T_DEVICE_MAN_RELATION
+		<trim prefix="SET" suffixOverrides=",">
+			<trim prefix="DEVICE_ID=CASE" suffix="END,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.deviceNo!=null">WHEN id=#{i.id} THEN #{i.deviceNo}</if>
+				</foreach>
+			</trim>
+
+			<trim prefix="USER_ID=CASE" suffix="END,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.userId!=null">WHEN id=#{i.id} THEN #{i.userId}</if>
+				</foreach>
+			</trim>
+
+			<trim prefix="BOUND_TIME=CASE" suffix="END,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.boundTime!=null">WHEN id=#{i.id} THEN #{i.boundTime}</if>
+				</foreach>
+			</trim>
+
+			<trim prefix="UNBOUND_TIME=CASE" suffix="END,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.unboudTime!=null">WHEN id=#{i.id} THEN #{i.unboudTime}</if>
+				</foreach>
+			</trim>
+			<trim prefix="ACTIVE=CASE" suffix="END,">
+				<foreach collection="list" item="i" index="index">
+					<if test="i.isActive!=null">WHEN id=#{i.id} THEN #{i.isActive}</if>
+				</foreach>
+			</trim>
+		</trim>
+		WHERE
+		<foreach collection="list" separator="or" item="i" index="index">id=#{i.id}</foreach>
+	</update>
+</mapper>

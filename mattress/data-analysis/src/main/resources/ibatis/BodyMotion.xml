@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="co.darma.smartmattress">
+
+
+	<resultMap type="co.darma.smartmattress.analysis.entity.BodyMotionType" id="BodyMotionType">
+		<id property="id" column="ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="level" column="LEVEL" javaType="string" jdbcType="VARCHAR"/>
+	</resultMap>
+
+
+	<select id="getTypebyId" parameterType="int" resultMap="BodyMotionType">
+		SELECT ID,LEVEL FROM T_MAN_BODY_MOTION_LEVEL WHERE ID = #{level_id}
+	</select>
+
+	<resultMap type="co.darma.smartmattress.analysis.entity.BodyMotion" id="BodyMotion">
+		<id property="id" column="ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="userId" column="USER_ID" javaType="Integer" jdbcType="INTEGER"/>
+		<result property="markTime" column="START_TIME" javaType="Long" jdbcType="INTEGER"/>
+		<result property="algorithmVersion" column="ALGORITHM" javaType="string" jdbcType="VARCHAR"/>
+		<association property="level" column="LEVEL_ID" select="co.darma.smartmattress.getTypebyId"/>
+		<association property="device" column="DEVICE_ID" select="co.darma.smartmattress.queryDeviceIdById"/>
+	</resultMap>
+
+
+	<insert id="batchInsertBM" parameterType="java.util.List">
+		insert into T_MAN_BODY_MOTION_RECORD(DEVICE_ID,USER_ID,START_TIME,LEVEL_ID,ALGORITHM)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.device.id},#{item.userId},#{item.markTime},#{item.level.id},#{item.algorithmVersion})
+		</foreach>
+	</insert>
+
+
+	<select id="getBodyMotionWithTime" resultMap="BodyMotion">
+		SELECT
+		T.ID,
+		T.DEVICE_ID,
+		T.USER_ID,
+		T.START_TIME,
+		T.LEVEL_ID as level_id
+		 FROM T_MAN_BODY_MOTION_RECORD T
+		 JOIN T_DEVICE D on D.ID = T.`DEVICE_ID`
+		 WHERE
+		 D.`PROJECT_ID` =  #{projectId} AND
+		<![CDATA[T.START_TIME >=#{startTime} AND T.START_TIME  <= #{endTime}]]>
+		 order by T.DEVICE_ID
+	</select>
+
+	<select id="queryBodyMotionWithDeviceAndTime" resultMap="BodyMotion">
+		SELECT
+		T.ID,
+		T.DEVICE_ID,
+		T.USER_ID,
+		T.START_TIME,
+		T.LEVEL_ID as level_id
+		FROM T_MAN_BODY_MOTION_RECORD T
+		WHERE T.DEVICE_ID = #{deviceId} AND <![CDATA[T.START_TIME >=#{startTime} AND T.START_TIME  < #{endTime}]]>
+	</select>
+
+	<select id="batchQueryBodyMotionWithId" resultMap="BodyMotion">
+		select T1.ID, T1.START_TIME,T1.LEVEL_ID,D.ID AS DEVICE_ID,D.DEVICE_SERIAL_NO,  L.LEVEL
+			from (select T.ID,T.DEVICE_ID,T.START_TIME,T.LEVEL_ID
+				from T_MAN_BODY_MOTION_RECORD T where T.ID >= #{startIndex}  order by T.ID asc  limit  #{count}  ) as T1,
+				T_DEVICE D,T_MAN_BODY_MOTION_LEVEL L
+		WHERE T1.DEVICE_ID = D.ID and T1.LEVEL_ID = L.ID order by T1.DEVICE_ID , T1.ID asc;
+	</select>
+
+
+</mapper>

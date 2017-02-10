@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="co.darma.smartmattress">
+
+	<resultMap type="co.darma.smartmattress.entity.Project" id="Project">
+		<id property="projectId" column="PROJECT_ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="projectName" column="PROJECT_NAME" javaType="string" jdbcType="VARCHAR"/>
+		<result property="companyName" column="COMPANY_NAME" javaType="string" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<select id="queryProjectById" parameterType="int" resultMap="Project">
+		SELECT PROJECT_ID,PROJECT_NAME,COMPANY_NAME from T_PROJECT where PROJECT_ID = #{project}
+	</select>
+</mapper>

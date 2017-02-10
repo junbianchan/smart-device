@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="co.darma.smartmattress">
+
+	<resultMap type="co.darma.smartmattress.analysis.entity.BodyMotionForSleep" id="BodyMotionForSleep">
+		<id property="deviceId" column="DEVICE_ID" jdbcType="INTEGER"/>
+		<id property="startTime" column="START_TIME" javaType="Long" jdbcType="INTEGER"/>
+		<result property="endTime" column="END_TIME" javaType="Long" jdbcType="INTEGER"/>
+		<result property="metaData" column="META_DATA" javaType="java.lang.String" jdbcType="VARCHAR"/>
+		<result property="dataNumber" column="DATA_NUMBER" javaType="Integer" jdbcType="INTEGER"/>
+		<result property="algorithmVersion" column="ALGORITHM" javaType="string" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<insert id="insertBodyMotionForSleep">
+		insert into T_MAN_BODY_MOTION_SLEEP(DEVICE_ID,START_TIME,END_TIME,META_DATA,DATA_NUMBER,ALGORITHM)
+		values
+			(#{deviceId},#{startTime},#{endTime},#{metaData},#{dataNumber},#{algorithmVersion})
+	</insert>
+
+
+	<select id="queryBodyMotionForSleep" resultMap="BodyMotionForSleep">
+		SELECT
+		T.DEVICE_ID,
+		T.START_TIME,
+		T.END_TIME,
+		T.META_DATA,
+		T.DATA_NUMBER,
+		T.ALGORITHM
+		FROM
+		T_MAN_BODY_MOTION_SLEEP T
+		WHERE DEVICE_ID = #{deviceId} AND <![CDATA[ T.START_TIME >= #{startTime} AND T.END_TIME  <= ${endTime}]]>
+		ORDER BY START_TIME ASC
+	</select>
+
+</mapper>

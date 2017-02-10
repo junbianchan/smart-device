@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="co.darma.smartmattress.upgrade">
+
+	<resultMap type="co.darma.smartmattress.upgrade.entity.UpgradeRequest" id="UpgradeRequest">
+		<id property="id" column="ID" javaType="long" jdbcType="INTEGER"/>
+		<result property="planUpdateTime" column="PLAN_UPDATE_TIME" javaType="long" jdbcType="INTEGER"/>
+		<association property="device" column="DEVICE_ID" select="co.darma.smartmattress.queryDeviceIdById"/>
+		<association property="sourceFirmware" column="SRC_FIRMWARE_ID"
+					 select="co.darma.smartmattress.upgrade.queryFirmwareById"/>
+		<association property="targetFirmware" column="TARGET_FIRMWARE_ID"
+					 select="co.darma.smartmattress.upgrade.queryFirmwareById"/>
+	</resultMap>
+
+	<resultMap type="co.darma.smartmattress.upgrade.entity.UpgradeRequestRecord" id="UpgradeRequestRecord">
+		<id property="id" column="ID" javaType="long" jdbcType="INTEGER"/>
+		<result property="planUpdateTime" column="PLAN_UPDATE_TIME" javaType="long" jdbcType="INTEGER"/>
+		<result property="actualUpdateTime" column="UPDATE_TIME" javaType="long" jdbcType="INTEGER"/>
+
+		<result property="updateResult" column="UPDATE_RESULT" javaType="boolean" jdbcType="INTEGER"/>
+		<result property="updateMessage" column="UPDATE_MESSAGE" javaType="string" jdbcType="VARCHAR"/>
+
+		<association property="device" column="DEVICE_ID" select="co.darma.smartmattress.queryDeviceIdById"/>
+		<association property="sourceFirmware" column="SRC_FIRMWARE_ID"
+					 select="queryFirmwareById"/>
+		<association property="targetFirmware" column="TARGET_FIRMWARE_ID"
+					 select="co.darma.smartmattress.upgrade.queryFirmwareById"/>
+	</resultMap>
+
+	<select id="queryUpgradeRequest" resultMap="UpgradeRequest">
+		SELECT
+		T.ID,
+		T.DEVICE_ID,
+		T.PLAN_UPDATE_TIME,
+		T.SRC_FIRMWARE_ID ,
+		T.TARGET_FIRMWARE_ID
+		FROM T_UPGRADE_REQUEST_QUEUE T ORDER BY T.PLAN_UPDATE_TIME ASC limit 0, 1
+	</select>
+
+	<select id="queryUpgradeRequestByProjectId" resultMap="UpgradeRequest">
+		SELECT
+		T.ID,
+		T.DEVICE_ID,
+		T.PLAN_UPDATE_TIME,
+		T.SRC_FIRMWARE_ID,
+		T.TARGET_FIRMWARE_ID
+		FROM T_UPGRADE_REQUEST_QUEUE T
+		WHERE T.TARGET_FIRMWARE_ID in (
+		select DISTINCT (R.FIRMWARE_ID)
+			FROM T_R_PROJECT_FIRMWARE R where R.PROJECT_ID = #{projectId}
+		)
+		ORDER BY T.PLAN_UPDATE_TIME ASC limit 0, 1
+	</select>
+
+
+	<update id="saveUpgraderRequest" parameterType="co.darma.smartmattress.upgrade.entity.UpgradeRequest">
+		insert into
+		T_UPGRADE_REQUEST_QUEUE(`DEVICE_ID`,`PLAN_UPDATE_TIME`,`SRC_FIRMWARE_ID`,`TARGET_FIRMWARE_ID`)VALUES
+		(#{device.id},#{planUpdateTime},#{sourceFirmware.firmwareId},#{targetFirmware.firmwareId})
+	</update>
+
+	<update id="saveUpradeRecord" parameterType="co.darma.smartmattress.upgrade.entity.UpgradeRequestRecord">
+		insert into
+		T_UPGRADE_REQUEST_RECORD(`DEVICE_ID`,`PLAN_UPDATE_TIME`,`UPDATE_TIME`,`UPDATE_RESULT`,`UPDATE_MESSAGE`,`SRC_FIRMWARE_ID`,`TARGET_FIRMWARE_ID`)VALUES
+		(#{device.id},#{planUpdateTime},#{actualUpdateTime},#{updateResult},#{updateMessage},#{sourceFirmware.firmwareId},#{targetFirmware.firmwareId})
+	</update>
+
+	<delete id="deleteUprequest" parameterType="java.lang.Long">
+		DELETE FROM T_UPGRADE_REQUEST_QUEUE  WHERE ID = #{id}
+	</delete>
+
+
+	<select id="hasUpgradeRequestOrNot" resultMap="UpgradeRequest">
+		SELECT ID FROM T_UPGRADE_REQUEST_QUEUE T WHERE T.DEVICE_ID = #{deviceId} AND T.TARGET_FIRMWARE_ID = #{firmwareId}
+	</select>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="co.darma.smartmattress">
+
+
+	<resultMap type="co.darma.smartmattress.analysis.entity.ManBehaviorType" id="ManBehaviorType">
+		<id property="id" column="ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="type" column="TYPE" javaType="string" jdbcType="VARCHAR"/>
+	</resultMap>
+
+
+	<resultMap type="co.darma.smartmattress.analysis.entity.ManBehavior" id="ManBehavior">
+		<id property="id" column="ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="deviceId" column="DEVICE_ID" javaType="Integer" jdbcType="INTEGER"/>
+		<result property="userId" column="USER_ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="markTime" column="START_TIME" javaType="long" jdbcType="INTEGER"/>
+		<result property="algorithmVersion" column="ALGORITHM" javaType="string" jdbcType="VARCHAR"/>
+
+		<association property="type" column="TYPE_ID" select="co.darma.smartmattress.queryTypeById"/>
+	</resultMap>
+
+	<select id="queryTypeById" parameterType="int" resultMap="ManBehaviorType">
+		SELECT ID,TYPE from T_MAN_BEHAVIOR_TYPE where ID = #{TYPE_ID}
+	</select>
+
+	<insert id="insertBehavior" parameterType="co.darma.smartmattress.analysis.entity.ManBehavior">
+		insert into T_MAN_BEHAVIOR_RECORD(DEVICE_ID,USER_ID,START_TIME,TYPE_ID,ALGORITHM)
+		values
+			(#{deviceId},#{userId},#{markTime},#{type.id},#{algorithmVersion})
+	</insert>
+
+	<select id="queryLastestManBehaviorByDevice" resultMap="ManBehavior">
+		SELECT
+		T.ID,
+		T.DEVICE_ID,
+		T.USER_ID,
+		T.START_TIME,
+		T.TYPE_ID
+		FROM T_MAN_BEHAVIOR_RECORD T
+		WHERE
+	 	T.DEVICE_ID = #{deviceId}
+	 	AND T.START_TIME >= #{limitTime}
+	 	AND T.TYPE_ID = 4
+		order by T.START_TIME DESC limit 0, 1
+	</select>
+
+
+	<select id="queryLastestBehaviorByDevice" resultMap="ManBehavior">
+		SELECT
+		T.ID,
+		T.DEVICE_ID,
+		T.USER_ID,
+		T.START_TIME,
+		T.TYPE_ID
+		FROM T_MAN_BEHAVIOR_RECORD T
+		WHERE
+		T.DEVICE_ID = #{deviceId}
+		order by T.START_TIME DESC limit 0, 1
+	</select>
+
+
+</mapper>

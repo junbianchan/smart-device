@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="co.darma.smartmattress">
+
+	<resultMap type="co.darma.smartmattress.entity.UserInfo" id="UserInfo">
+		<id property="id" column="USER_ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="userName" column="USER_NAME" javaType="string" jdbcType="VARCHAR"/>
+		<result property="password" column="PASSWORD" javaType="string" jdbcType="VARCHAR"/>
+		<result property="userFullName" column="USER_FULL_NAME" javaType="string" jdbcType="VARCHAR"/>
+		<result property="sex" column="SEX" javaType="string" jdbcType="VARCHAR"/>
+		<result property="phone" column="PHONE" javaType="string" jdbcType="VARCHAR"/>
+		<result property="email" column="EMAIL" javaType="string" jdbcType="VARCHAR"/>
+		<result property="weightKilo" column="WEIGHT_KILO" javaType="java.lang.Double" jdbcType="DECIMAL"/>
+		<result property="weightPound" column="WEIGHT_POUND" javaType="java.lang.Double" jdbcType="DECIMAL"/>
+		<result property="onLine" column="ONLINE" javaType="boolean" jdbcType="INTEGER"/>
+		<result property="registerTime" column="REGISTER_TIME" javaType="java.lang.Long" jdbcType="INTEGER"/>
+		<result property="tokenType" column="TOKEN_TYPE" javaType="string" jdbcType="VARCHAR"/>
+		<result property="salt" column="SALT" javaType="string" jdbcType="VARCHAR"/>
+		<association property="project" column="PROJECT_ID" select="co.darma.smartmattress.queryProjectById"/>
+	</resultMap>
+
+
+	<insert id="insertNewUser" parameterType="co.darma.smartmattress.entity.UserInfo" useGeneratedKeys="true"
+			keyProperty="id">
+		INSERT INTO T_USER (USER_NAME,PASSWORD,USER_FULL_NAME,SEX,PHONE,EMAIL,WEIGHT_KILO,WEIGHT_POUND,ONLINE,REGISTER_TIME)
+		VALUES (#{userName},#{password},#{userFullName},#{sex},#{phone},#{email},#{weightKilo},#{weightPound},#{onLine},#{registerTime})
+	</insert>
+
+	<select id="queryUserInfoByUserName" parameterType="String" resultMap="UserInfo">
+		select USER_ID,USER_NAME,PASSWORD,USER_FULL_NAME,SEX,PHONE,EMAIL,WEIGHT_KILO,WEIGHT_POUND,ONLINE,REGISTER_TIME,SALT,TOKEN_TYPE,PROJECT_ID from T_USER T WHERE T.USER_NAME = #{userName}
+	</select>
+
+	<select id="queryUserInfoByUserId" parameterType="Integer" resultMap="UserInfo">
+		select USER_ID,USER_NAME,USER_FULL_NAME,SEX,PHONE,EMAIL,WEIGHT_KILO,WEIGHT_POUND,ONLINE,REGISTER_TIME from T_USER T WHERE T.USER_ID = #{userId}
+	</select>
+
+</mapper>

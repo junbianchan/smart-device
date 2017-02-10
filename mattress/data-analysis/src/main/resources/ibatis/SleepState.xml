@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!--CREATE TABLE T_MAN_SLEEP_STATE-->
+<!--(-->
+<!--ID BIGINT(20) unsigned NOT NULL AUTO_INCREMENT,-->
+<!--DEVICE_ID BIGINT(20),-->
+<!--START_TIME BIGINT(15),-->
+<!--END_TIME BIGINT(15),-->
+<!--SLEEP_STATE SMALLINT(5),-->
+<!--ALGORITHM VARCHAR(4),-->
+<!--UPDATE_TIME BIGINT(20),-->
+<!--PRIMARY KEY (ID)-->
+<!--);-->
+<mapper namespace="co.darma.smartmattress">
+
+	<resultMap type="co.darma.smartmattress.analysis.entity.SleepState" id="SleepState">
+		<id property="id" column="ID" javaType="java.lang.Long" jdbcType="INTEGER"/>
+		<result property="startTime" column="START_TIME" javaType="long" jdbcType="INTEGER"/>
+		<result property="endTime" column="END_TIME" javaType="long" jdbcType="INTEGER"/>
+		<result property="sleepState" column="SLEEP_STATE" javaType="int" jdbcType="INTEGER"/>
+		<result property="algorithmVersion" column="ALGORITHM" javaType="string" jdbcType="VARCHAR"/>
+		<result property="updateTime" column="UPDATE_TIME" javaType="long" jdbcType="INTEGER"/>
+		<association property="device" column="DEVICE_ID" select="co.darma.smartmattress.queryDeviceIdById"/>
+	</resultMap>
+
+
+	<insert id="batchInsertSleepState" parameterType="java.util.List">
+		insert into T_MAN_SLEEP_STATE(DEVICE_ID,START_TIME,END_TIME,SLEEP_STATE,ALGORITHM,UPDATE_TIME)
+		values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.device.id},#{item.startTime},#{item.endTime},#{item.sleepState},#{item.algorithmVersion},#{item.updateTime})
+		</foreach>
+		on DUPLICATE KEY UPDATE `SLEEP_STATE` =  VALUES(SLEEP_STATE),
+		 `END_TIME` =  VALUES(END_TIME)
+	</insert>
+
+
+	<select id="querySleepState" resultMap="SleepState">
+		SELECT
+		T.ID,
+		T.DEVICE_ID,
+		T.START_TIME,
+		T.END_TIME,
+		T.SLEEP_STATE,
+		T.ALGORITHM,
+		T.UPDATE_TIME
+		FROM T_MAN_SLEEP_STATE T
+		WHERE
+		<![CDATA[T.UPDATE_TIME > #{lastUpdateTime} AND T.DEVICE_ID = #{deviceId}]]>
+		order by T.START_TIME ASC
+	</select>
+
+
+</mapper>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="co.darma.smartmattress">
+
+	<resultMap type="co.darma.smartmattress.analysis.entity.MeddoHealthData" id="MeddoHealthData">
+		<id property="id" column="ID" javaType="int" jdbcType="INTEGER"/>
+		<result property="markTime" column="START_TIME" javaType="long" jdbcType="INTEGER"/>
+		<result property="heartRate" column="HEART_RATE" javaType="int" jdbcType="INTEGER"/>
+		<result property="breathValue" column="BREATH" javaType="int" jdbcType="INTEGER"/>
+		<result property="algorithmVersion" column="ALGORITHM" javaType="string" jdbcType="VARCHAR"/>
+		<result property="heartRateWeight" column="HEART_RATE_WEIGHT" javaType="int" jdbcType="INTEGER"/>
+		<result property="breathValueWeight" column="BREATH_WEIGHT" javaType="int" jdbcType="INTEGER"/>
+		<result property="lastUpdateTime" column="LAST_UPDATE_TIME" javaType="long" jdbcType="INTEGER"/>
+		<result property="reallyData" column="REALLY_DATA" javaType="int" jdbcType="INTEGER"/>
+
+		<association property="device" column="DEVICE_ID" select="co.darma.smartmattress.queryDeviceIdById"/>
+
+</resultMap>
+
+
+	<update id="batchUpdateHealthDatas" parameterType="java.util.List">
+		insert into
+		T_MAN_HEALTH_MEDDO(`DEVICE_ID`,`START_TIME`,`HEART_RATE`,`BREATH`,`ALGORITHM`,`HEART_RATE_WEIGHT`,`BREATH_WEIGHT`,`LAST_UPDATE_TIME`,`REALLY_DATA`)VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.device.id},#{item.markTime},#{item.heartRate},#{item.breathValue},#{item.algorithmVersion},#{item.heartRateWeight},#{item.breathValueWeight}
+			,#{item.lastUpdateTime},#{item.reallyData})
+		</foreach>
+	</update>
+
+	<update id="updateHealthDatas" parameterType="co.darma.smartmattress.analysis.entity.MeddoHealthData">
+		insert into
+		T_MAN_HEALTH_MEDDO(`DEVICE_ID`,`START_TIME`,`HEART_RATE`,`BREATH`,`ALGORITHM`,`HEART_RATE_WEIGHT`,`BREATH_WEIGHT`,`LAST_UPDATE_TIME`,`REALLY_DATA`)VALUES
+			(#{device.id},#{markTime},#{heartRate},#{breathValue},#{algorithmVersion},#{heartRateWeight},#{breathValueWeight},#{lastUpdateTime},#{reallyData})
+	</update>
+
+	<select id="queryHealthDatas" resultMap="MeddoHealthData">
+		SELECT T.ID,
+		T.DEVICE_ID,
+		T.START_TIME,
+		T.HEART_RATE,
+		T.HEART_RATE_WEIGHT,
+		T.BREATH,
+		T.BREATH_WEIGHT ,
+		T.LAST_UPDATE_TIME
+		FROM
+		T_MAN_HEALTH_MEDDO T
+		JOIN T_DEVICE D on D.ID = T.`DEVICE_ID`
+		WHERE
+		D.`PROJECT_ID` =  #{projectId} AND
+		<![CDATA[ T.LAST_UPDATE_TIME >= #{startTime} AND T.LAST_UPDATE_TIME  <= #{endTime}]]>
+		ORDER BY DEVICE_ID,LAST_UPDATE_TIME ASC
+	</select>
+
+
+	<select id="queryLastestHealthDataByDevice" resultMap="MeddoHealthData">
+		SELECT T.ID,
+		T.DEVICE_ID,
+		T.START_TIME,
+		T.HEART_RATE,
+		T.HEART_RATE_WEIGHT,
+		T.BREATH,
+		T.BREATH_WEIGHT ,
+		T.LAST_UPDATE_TIME
+		FROM
+		T_MAN_HEALTH_MEDDO T
+		WHERE  DEVICE_ID = #{deviceId} AND  <![CDATA[ T.LAST_UPDATE_TIME >= #{startTime}]]> ORDER BY LAST_UPDATE_TIME ASC
+	</select>
+
+	<select id="queryHealthDataByDevice" resultMap="MeddoHealthData">
+		SELECT T.ID,
+		T.START_TIME,
+		T.HEART_RATE,
+		T.BREATH
+		FROM
+		T_MAN_HEALTH_MEDDO T
+		WHERE  DEVICE_ID = #{deviceId} AND <![CDATA[ T.START_TIME >= #{startTime} AND T.START_TIME  <= #{endTime}]]> ORDER BY START_TIME ASC
+	</select>
+
+	<select id="queryObjExistOrNot" resultMap="MeddoHealthData">
+	SELECT T.ID
+	FROM
+		T_MAN_HEALTH_MEDDO T
+	WHERE T.START_TIME = #{markTime} AND DEVICE_ID = #{deviceId}
+	</select>
+
+</mapper>
